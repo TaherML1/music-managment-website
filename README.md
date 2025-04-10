@@ -1,20 +1,24 @@
-🎵 Music Management System - Spring Boot & Docker
-Docker
-Spring Boot
-AWS
+🎵 Music Management System
+Spring Boot | Docker | AWS
 
 A production-ready music management application demonstrating modern DevOps practices with Spring Boot, Docker, and AWS EC2 deployment.
 
-🚀 Key Features
-Full CRUD Operations via REST API (/music) and Thymeleaf UI (/music/home)
+🚀 Features
+🔧 Full CRUD operations via:
 
-Containerized Architecture with Docker and Docker Compose
+REST API → /music
 
-Cloud Deployment on AWS EC2 with Nginx reverse proxy
+Thymeleaf Web UI → /music/home
 
-CI/CD Ready with Docker Hub integration
+📦 Containerized with Docker & Docker Compose
 
-Persistent MySQL Database using Docker volumes
+☁️ Cloud-ready: Easily deploy on AWS EC2
+
+🔁 Reverse Proxy via Nginx
+
+🚀 CI/CD-ready: Docker Hub integration
+
+🗃️ Persistent MySQL storage using Docker volumes
 
 🛠️ Tech Stack
 Backend
@@ -29,91 +33,99 @@ Maven
 Infrastructure
 Docker + Docker Compose
 
-Nginx reverse proxy
+Nginx
 
 AWS EC2 (t2.micro)
 
 📦 Docker Deployment
-Prerequisites
+🔧 Prerequisites
 Docker Engine
 
 Docker Compose
 
 (Optional) Docker Hub account
 
-Running Locally
-Clone the repository:
+▶️ Running Locally
+Clone the repository
 
 bash
 Copy
+Edit
 git clone https://github.com/yourusername/music-app.git
 cd music-app
-Start the application:
+Start the app
 
 bash
 Copy
+Edit
 docker-compose up -d
-Access the application:
+Access the app
 
-API: http://localhost:8080/music
+REST API: http://localhost:8080/music
 
-Web Interface: http://localhost:8080/music/home
+Web UI: http://localhost:8080/music/home
 
-Docker Hub Integration
-Pushing to Docker Hub
-Build the image:
-
+☁️ Docker Hub Integration
+🔨 Build & Push
 bash
 Copy
+Edit
 docker build -t yourusername/music-app .
-Push to Docker Hub:
-
-bash
-Copy
 docker push yourusername/music-app:latest
-Pulling from Docker Hub
+📥 Pull from Docker Hub
 bash
 Copy
+Edit
 docker pull yourusername/music-app:latest
 ☁️ AWS EC2 Deployment
-Launch EC2 Instance:
+🚀 Launch EC2 Instance
+OS: Amazon Linux 2023
 
-Amazon Linux 2023
+Type: t2.micro
 
-t2.micro
+Security Groups: Open ports 22 (SSH) and 80 (HTTP)
 
-Security Groups: Allow ports 22 (SSH), 80 (HTTP)
-
-Install Dependencies:
-
+🧰 Install Dependencies
 bash
 Copy
+Edit
 sudo yum install docker -y
 sudo systemctl start docker
 sudo usermod -aG docker ec2-user
-Deploy:
-
+🚀 Deploy Application
 bash
 Copy
+Edit
 docker-compose up -d
-Configure Nginx:
+🌐 Configure Nginx Reverse Proxy
+Install Nginx
 
 bash
 Copy
+Edit
 sudo yum install nginx -y
+Create config
+
+bash
+Copy
+Edit
 sudo nano /etc/nginx/conf.d/music_app.conf
-Add:
+Add the following configuration:
 
 nginx
 Copy
+Edit
 server {
     listen 80;
     server_name _;
+
     location / {
         proxy_pass http://localhost:8080;
     }
 }
-Then:
+Start Nginx
 
-
+bash
+Copy
+Edit
 sudo systemctl start nginx
