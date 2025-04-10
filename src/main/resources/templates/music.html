@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary-color: #3f37c9;
+            --danger-color: #f72585;
+            --danger-dark: #e5177b;
+            --success-color: #4cc9f0;
+            --success-dark: #38b6db;
+            --warning-color: #f8961e;
+            --warning-dark: #e68a1a;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .btn i {
+            margin-right: 6px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: var(--warning-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .search-container .form-control {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray-color);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .close {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--gray-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close:hover {
+            color: var(--danger-color);
+        }
+
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast i {
+            margin-right: 10px;
+        }
+
+        .toast.success {
+            background-color: var(--success-color);
+        }
+
+        .toast.error {
+            background-color: var(--danger-color);
+        }
+
+        .toast.warning {
+            background-color: var(--warning-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+            }
+
+            th, td {
+                padding: 10px 8px;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .btn-sm {
+                width: 100%;
+            }
+        }
+
+        /* Animation for table rows */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        tbody tr {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: rgba(248, 249, 250, 0.5);
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1><i class="fas fa-music"></i> Music Management System</h1>
+        <button class="btn btn-primary" onclick="openAddModal()">
+            <i class="fas fa-plus"></i> Add Music
+        </button>
+    </header>
+
+    <div class="card">
+        <h2><i class="fas fa-list"></i> Music Library</h2>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by name, singer or year...">
+            <button class="btn btn-primary" onclick="searchMusic()">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Singer</th>
+                    <th>Year</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="musicTableBody">
+                <tr th:each="music : ${musicList}" th:attr="data-id=${music.id}">
+                    <td th:text="${music.id}"></td>
+                    <td th:text="${music.name}"></td>
+                    <td th:text="${music.singer}"></td>
+                    <td th:text="${music.year}"></td>
+                    <td class="actions">
+                        <button class="btn btn-success btn-sm" onclick="openEditModal([[${music.id}]])">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="confirmDelete([[${music.id}]], '[[${music.name}]]')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+                <tr th:unless="${not musicList.isEmpty()}">
+                    <td colspan="5" class="empty-state">
+                        <i class="fas fa-music"></i>
+                        <p>No music found. Add some music to get started!</p>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-plus"></i> Add New Music</h3>
+            <span class="close" onclick="closeModal('addModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="addMusicForm">
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-heading"></i> Name:</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="singer"><i class="fas fa-user"></i> Singer:</label>
+                    <input type="text" id="singer" name="singer" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="year"><i class="fas fa-calendar-alt"></i> Year:</label>
+                    <input type="number" id="year" name="year" class="form-control" required min="1900" max="2100">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-warning" onclick="closeModal('addModal')">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="btn btn-primary" onclick="addMusic()" id="addMusicBtn">
+                <i class="fas fa-save"></i> Save Music
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-edit"></i> Edit Music</h3>
+            <span class="close" onclick="closeModal('editModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="editMusicForm">
+                <input type="hidden" id="editMusicId">
+                <div class="form-group">
+                    <label for="editName"><i class="fas fa-heading"></i> Name:</label>
+                    <input type="text" id="editName" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editSinger"><i class="fas fa-user"></i> Singer:</label>
+                    <input type="text" id="editSinger" name="singer" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editYear"><i class="fas fa-calendar-alt"></i> Year:</label>
+                    <input type="number" id="editYear" name="year" class="form-control" required min="1900" max="2100">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-warning" onclick="closeModal('editModal')">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="btn btn-primary" onclick="updateMusic()" id="updateMusicBtn">
+                <i class="fas fa-save"></i> Update Music
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h3>
+            <span class="close" onclick="closeModal('deleteModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete "<span id="musicToDeleteName"></span>"?</p>
+            <p>This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-warning" onclick="closeModal('deleteModal')">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="btn btn-danger" onclick="proceedWithDelete()" id="deleteMusicBtn">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<div id="toast" class="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Operation completed successfully</span>
+</div>
+
+<script>
+
+    const addModal = document.getElementById('addModal');
+    const editModal = document.getElementById('editModal');
+    const deleteModal = document.getElementById('deleteModal');
+    const toast = document.getElementById('toast');
+    const musicTableBody = document.getElementById('musicTableBody');
+    const searchInput = document.getElementById('searchInput');
+
+
+    let musicToDeleteId = null;
+    let isLoading = false;
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        window.addEventListener('click', function (event) {
+            if (event.target === addModal) closeModal('addModal');
+            if (event.target === editModal) closeModal('editModal');
+            if (event.target === deleteModal) closeModal('deleteModal');
+        });
+
+
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                searchMusic();
+            }
+        });
+    });
+
+
+    function openAddModal() {
+        document.getElementById('addMusicForm').reset();
+        showModal('addModal');
+    }
+
+    function openEditModal(id) {
+        setLoading(true, 'updateMusicBtn');
+        fetch(`/music/${id}`)
+            .then(response => response.json())
+            .then(music => {
+                document.getElementById('editMusicId').value = music.id;
+                document.getElementById('editName').value = music.name;
+                document.getElementById('editSinger').value = music.singer;
+                document.getElementById('editYear').value = music.year;
+                showModal('editModal');
+            })
+            .catch(error => {
+                showToast('Failed to load music details', 'error');
+                console.error('Error:', error);
+            })
+            .finally(() => setLoading(false, 'updateMusicBtn'));
+    }
+
+    function confirmDelete(id, name) {
+        musicToDeleteId = id;
+        document.getElementById('musicToDeleteName').textContent = name;
+        showModal('deleteModal');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('show');
+    }
+
+    function showModal(modalId) {
+        document.getElementById(modalId).classList.add('show');
+    }
+
+    // CRUD operationss
+    function addMusic() {
+        const name = document.getElementById('name').value.trim();
+        const singer = document.getElementById('singer').value.trim();
+        const year = document.getElementById('year').value;
+
+        if (!name || !singer || !year) {
+            showToast('Please fill in all fields', 'error');
+            return;
+        }
+
+        setLoading(true, 'addMusicBtn');
+
+        fetch('/music', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, singer, year: parseInt(year) })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to add music');
+                }
+                return response.json();
+            })
+            .then(() => {
+                showToast('Music added successfully', 'success');
+                closeModal('addModal');
+                // Refresh the table instead of reloading the page
+                fetchMusicList();
+            })
+            .catch(error => {
+                showToast('Failed to add music', 'error');
+                console.error('Error:', error);
+            })
+            .finally(() => setLoading(false, 'addMusicBtn'));
+    }
+
+    function updateMusic() {
+        const id = document.getElementById('editMusicId').value;
+        const name = document.getElementById('editName').value.trim();
+        const singer = document.getElementById('editSinger').value.trim();
+        const year = document.getElementById('editYear').value;
+
+        if (!name || !singer || !year) {
+            showToast('Please fill in all fields', 'error');
+            return;
+        }
+
+        setLoading(true, 'updateMusicBtn');
+
+        fetch(`/music/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, singer, year: parseInt(year) })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update music');
+                }
+                return response.json();
+            })
+            .then(data => {
+                showToast('Music updated successfully', 'success');
+                closeModal('editModal');
+
+                updateMusicRow(id, name, singer, year);
+            })
+            .catch(error => {
+                showToast('Failed to update music', 'error');
+                console.error('Error:', error);
+            })
+            .finally(() => setLoading(false, 'updateMusicBtn'));
+    }
+
+    function proceedWithDelete() {
+        if (!musicToDeleteId) return;
+
+        setLoading(true, 'deleteMusicBtn');
+
+        fetch(`/music/${musicToDeleteId}`, {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete music');
+                }
+                return response;
+            })
+            .then(() => {
+                showToast('Music deleted successfully', 'success');
+                closeModal('deleteModal');
+                // Remove the row from the table
+                removeMusicRow(musicToDeleteId);
+                musicToDeleteId = null;
+            })
+            .catch(error => {
+                showToast('Failed to delete music', 'error');
+                console.error('Error:', error);
+            })
+            .finally(() => setLoading(false, 'deleteMusicBtn'));
+    }
+
+    function searchMusic() {
+        const query = searchInput.value.trim();
+        if (!query) {
+            fetchMusicList();
+            return;
+        }
+
+        fetch(`/music/search?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                updateMusicTable(data);
+            })
+            .catch(error => {
+                showToast('Failed to search music', 'error');
+                console.error('Error:', error);
+            });
+    }
+
+    // Helper functions
+    function fetchMusicList() {
+        fetch('/music')
+            .then(response => response.json())
+            .then(data => {
+                updateMusicTable(data);
+            })
+            .catch(error => {
+                showToast('Failed to load music list', 'error');
+                console.error('Error:', error);
+            });
+    }
+
+    function updateMusicTable(musicList) {
+        if (musicList.length === 0) {
+            musicTableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        <i class="fas fa-music"></i>
+                        <p>No music found</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        musicTableBody.innerHTML = musicList.map(music => `
+            <tr data-id="${music.id}">
+                <td>${music.id}</td>
+                <td>${music.name}</td>
+                <td>${music.singer}</td>
+                <td>${music.year}</td>
+                <td class="actions">
+                    <button class="btn btn-success btn-sm" onclick="openEditModal(${music.id})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="confirmDelete(${music.id}, '${music.name.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function updateMusicRow(id, name, singer, year) {
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        if (row) {
+            row.cells[1].textContent = name;
+            row.cells[2].textContent = singer;
+            row.cells[3].textContent = year;
+        }
+    }
+
+    function removeMusicRow(id) {
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        if (row) {
+            row.remove();
+        }
+
+        // If no rows left, show empty state
+        if (musicTableBody.querySelectorAll('tr').length === 0) {
+            musicTableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        <i class="fas fa-music"></i>
+                        <p>No music found. Add some music to get started!</p>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    function showToast(message, type = 'success') {
+        const toastMessage = document.getElementById('toastMessage');
+        const toastIcon = toast.querySelector('i');
+
+        toast.className = `toast ${type}`;
+        toastMessage.textContent = message;
+
+        // Update icon based on type
+        if (type === 'success') {
+            toastIcon.className = 'fas fa-check-circle';
+        } else if (type === 'error') {
+            toastIcon.className = 'fas fa-exclamation-circle';
+        } else if (type === 'warning') {
+            toastIcon.className = 'fas fa-exclamation-triangle';
+        }
+
+        toast.classList.add('show');
+
+        // Hide after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    function setLoading(isLoading, buttonId) {
+        const button = document.getElementById(buttonId);
+        if (!button) return;
+
+        if (isLoading) {
+            button.disabled = true;
+            button.innerHTML = `<span class="spinner"></span> ${button.textContent.trim()}`;
+        } else {
+            button.disabled = false;
+            // Restore original button content
+            if (buttonId === 'addMusicBtn') {
+                button.innerHTML = `<i class="fas fa-save"></i> Save Music`;
+            } else if (buttonId === 'updateMusicBtn') {
+                button.innerHTML = `<i class="fas fa-save"></i> Update Music`;
+            } else if (buttonId === 'deleteMusicBtn') {
+                button.innerHTML = `<i class="fas fa-trash"></i> Delete`;
+            }
+        }
+    }
+</script>
+</body>
+</html>

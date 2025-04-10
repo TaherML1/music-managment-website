@@ -1,0 +1,31 @@
+services:
+  music_app:
+    image: taherml/music_app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/music
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Taher1999
+    ports:
+      - "8080:8080"
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: Taher1999
+      MYSQL_DATABASE: music
+    ports:
+      - "3307:3306"  # Using alternate port to avoid conflict
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pTaher1999"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  mysql-data:
