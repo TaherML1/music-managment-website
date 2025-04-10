@@ -1,4 +1,4 @@
-🎵 Music Management System
+**🎵 Music Management System**
 Spring Boot | Docker | AWS
 
 A production-ready music management application demonstrating modern DevOps practices with Spring Boot, Docker, and AWS EC2 deployment.
