@@ -7,14 +7,14 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/music
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: Taher1999
+      SPRING_DATASOURCE_PASSWORD: password
     ports:
       - "8080:8080"
 
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: Taher1999
+      MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: music
     ports:
       - "3307:3306"  # Using alternate port to avoid conflict
