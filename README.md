@@ -1,33 +1,119 @@
-# SWE 304 Project - Spring Boot Application on AWS
+🎵 Music Management System - Spring Boot & Docker
+Docker
+Spring Boot
+AWS
 
-This project involves deploying a simple Java Spring Boot web application on AWS. The application includes database connectivity and supports CRUD operations. The project does not use container technologies; instead, the application is packaged as a JAR file using Maven and deployed to an AWS EC2 instance.
+A production-ready music management application demonstrating modern DevOps practices with Spring Boot, Docker, and AWS EC2 deployment.
 
-## Technologies Used
-- **Spring Boot**: Java framework for building the web application.
-- **MySQL**: Database management system.
-- **AWS EC2**: Cloud server for hosting the application.
-- **Nginx**: Reverse proxy and web server.
-- **Maven**: Build tool for creating the JAR file.
-- **Postman**: Tool for testing API endpoints.
+🚀 Key Features
+Full CRUD Operations via REST API (/music) and Thymeleaf UI (/music/home)
 
-## Project Steps
-1. **Local Development**:
-   - Developed the Spring Boot application locally.
-   - Implemented CRUD operations and database connectivity.
-   - Created a JAR file using Maven.
+Containerized Architecture with Docker and Docker Compose
 
-2. **AWS EC2 Setup**:
-   - Created an EC2 instance on AWS.
-   - Configured security groups to allow HTTP, HTTPS, and SSH access.
+Cloud Deployment on AWS EC2 with Nginx reverse proxy
 
-3. **Database Setup**:
-   - Installed MySQL/PostgreSQL on the EC2 instance.
-   - Loaded the database schema and initial data.
+CI/CD Ready with Docker Hub integration
 
-4. **Nginx Configuration**:
-   - Installed Nginx on the EC2 instance.
-   - Configured Nginx as a reverse proxy for the Spring Boot application.
+Persistent MySQL Database using Docker volumes
 
-5. **Deployment**:
-   - Transferred the JAR file to the EC2 instance using SFTP.
-   - Ran the JAR file on the EC2 instance to deploy the application.
+🛠️ Tech Stack
+Backend
+Spring Boot 3.x
+
+Spring Data JPA (Hibernate)
+
+MySQL 8.0
+
+Maven
+
+Infrastructure
+Docker + Docker Compose
+
+Nginx reverse proxy
+
+AWS EC2 (t2.micro)
+
+📦 Docker Deployment
+Prerequisites
+Docker Engine
+
+Docker Compose
+
+(Optional) Docker Hub account
+
+Running Locally
+Clone the repository:
+
+bash
+Copy
+git clone https://github.com/yourusername/music-app.git
+cd music-app
+Start the application:
+
+bash
+Copy
+docker-compose up -d
+Access the application:
+
+API: http://localhost:8080/music
+
+Web Interface: http://localhost:8080/music/home
+
+Docker Hub Integration
+Pushing to Docker Hub
+Build the image:
+
+bash
+Copy
+docker build -t yourusername/music-app .
+Push to Docker Hub:
+
+bash
+Copy
+docker push yourusername/music-app:latest
+Pulling from Docker Hub
+bash
+Copy
+docker pull yourusername/music-app:latest
+☁️ AWS EC2 Deployment
+Launch EC2 Instance:
+
+Amazon Linux 2023
+
+t2.micro
+
+Security Groups: Allow ports 22 (SSH), 80 (HTTP)
+
+Install Dependencies:
+
+bash
+Copy
+sudo yum install docker -y
+sudo systemctl start docker
+sudo usermod -aG docker ec2-user
+Deploy:
+
+bash
+Copy
+docker-compose up -d
+Configure Nginx:
+
+bash
+Copy
+sudo yum install nginx -y
+sudo nano /etc/nginx/conf.d/music_app.conf
+Add:
+
+nginx
+Copy
+server {
+    listen 80;
+    server_name _;
+    location / {
+        proxy_pass http://localhost:8080;
+    }
+}
+Then:
+
+
+sudo systemctl start nginx
