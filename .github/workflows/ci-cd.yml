@@ -7,6 +7,10 @@ on:
     types: [closed]
     branches: [main]
 
+env:
+  AWS_DEPLOY_PATH: /home/${{ secrets.AWS_USER }}/app
+  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/music_app:latest
+
 jobs:
   build-jar:
     runs-on: ubuntu-latest
@@ -54,8 +58,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/music_app:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/music_app:latest
+          docker build -t $DOCKER_IMAGE .
+          docker push $DOCKER_IMAGE
 
   deploy-to-cloud:
     runs-on: ubuntu-latest
@@ -66,13 +70,36 @@ jobs:
         with:
           name: my-app-jar
           
-      - name: Install SSH key (AWS)
+      - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.AWS_KNOWN_HOSTS }}
           
-      - name: Copy JAR to AWS EC2
+      - name: Prepare EC2 environment
         run: |
-          scp -o StrictHostKeyChecking=no -r target/*.jar ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:/home/ubuntu/app
-          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} "chmod +x /home/ubuntu/app/*.jar"
+          # Create app directory and verify Java
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} <<EOF
+            mkdir -p $AWS_DEPLOY_PATH
+            if ! command -v java &> /dev/null; then
+              echo "Java not found, installing..."
+              sudo yum install -y java-17-amazon-corretto || \
+              sudo apt-get install -y openjdk-17-jdk || \
+              sudo zypper install -y java-17-openjdk
+            fi
+            java -version
+          EOF
+
+      - name: Deploy JAR to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no -r target/*.jar ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:$AWS_DEPLOY_PATH
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} "chmod +x $AWS_DEPLOY_PATH/*.jar"
+
+      - name: Verify deployment
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} <<EOF
+            echo "Deployed files:"
+            ls -la $AWS_DEPLOY_PATH
+            echo "Java version:"
+            java -version
+          EOF
