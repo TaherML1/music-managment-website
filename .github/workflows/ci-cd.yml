@@ -32,10 +32,16 @@ jobs:
 
   build-docker-image:
     runs-on: ubuntu-latest
-    needs: build-jar  # This job depends on the build-jar job
+    needs: build-jar
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
+
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: my-app-jar
+          path: target/  # This puts the JAR in the target directory
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -46,16 +52,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Download JAR artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: my-app-jar
-
       - name: Build Docker image
         run: |
           docker build -t taherml/music_app:v2 .
-          docker tag taherml/music_app:v2 mydockerhubusername/music_app:v2
-
-      - name: Push Docker image to DockerHub
-        run: |
-          docker push mydockerhubusername/music_app:v2
+          docker tag taherml/music_app:v2 ${{ secrets.DOCKER_USERNAME }}/music_app:v2
+          docker push ${{ secrets.DOCKER_USERNAME }}/music_app:v2
