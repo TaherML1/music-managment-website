@@ -1,0 +1,32 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  build-jar:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true || github.event_name == 'push'
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build with Maven
+        run: mvn clean package
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-app-jar
+          path: target/*.jar
