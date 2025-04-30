@@ -90,6 +90,8 @@ jobs:
             fi
             java -version
           EOF
+      - name: List downloaded files
+        run: ls -la target/
 
       - name: Deploy JAR to EC2
         run: |
