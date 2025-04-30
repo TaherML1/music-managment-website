@@ -95,7 +95,7 @@ jobs:
           scp -o StrictHostKeyChecking=no -r target/*.jar ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:$AWS_DEPLOY_PATH
           ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} "chmod +x $AWS_DEPLOY_PATH/*.jar"
 
-      - name: Verify deployment
+      - name: Verify deploymentt
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} <<EOF
             echo "Deployed files:"
