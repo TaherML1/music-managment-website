@@ -69,6 +69,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: my-app-jar
+          path: target
           
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
