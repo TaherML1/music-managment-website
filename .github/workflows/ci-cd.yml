@@ -79,7 +79,7 @@ jobs:
           
       - name: Prepare EC2 environment
         run: |
-          # Create app directory and verify Java
+          
           ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} <<EOF
             mkdir -p $AWS_DEPLOY_PATH
             if ! command -v java &> /dev/null; then
