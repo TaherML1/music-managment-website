@@ -61,48 +61,70 @@ jobs:
           docker build -t $DOCKER_IMAGE .
           docker push $DOCKER_IMAGE
 
-  deploy-to-ec-2:
+  deploy-to-ec2:
     runs-on: ubuntu-latest
-    needs: build-jar
+    needs: [build-jar, build-docker-image]
     steps:
-      - name: Download JAR 
-        uses: actions/download-artifact@v4
-        with:
-          name: music-app-jar
-          path: target
-          
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.AWS_KNOWN_HOSTS }}
-          
-      - name: Prepare EC2 environment
+
+      - name: Deploy to EC2
         run: |
-          
-          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} <<EOF
+          # Deploy JAR file
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} << 'EOS1'
             mkdir -p $AWS_DEPLOY_PATH
             if ! command -v java &> /dev/null; then
               echo "Java not found, installing..."
-              sudo yum install -y java-17-amazon-corretto || \
-              sudo apt-get install -y openjdk-17-jdk || \
-              sudo zypper install -y java-17-openjdk
+              sudo yum update -y
+              sudo yum install -y java-17-amazon-corretto
             fi
-            java -version
-          EOF
-      - name: List downloaded files
-        run: ls -la target/
-
-      - name: Deploy JAR to EC2
-        run: |
+          EOS1
+          
           scp -o StrictHostKeyChecking=no -r target/*.jar ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:$AWS_DEPLOY_PATH
           ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} "chmod +x $AWS_DEPLOY_PATH/*.jar"
 
-      - name: Verify deploymentt
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} <<EOF
+          # Deploy Docker container
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} << 'EOS2'
+            # Install Docker if not installed
+            if ! command -v docker &> /dev/null; then
+              echo "Installing Docker..."
+              sudo yum install -y docker
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              sudo usermod -aG docker $USER
+              sudo chmod 666 /var/run/docker.sock
+            fi
+
+            # Verify Docker installation
+            if ! sudo docker info &> /dev/null; then
+              echo "Docker is not running properly"
+              exit 1
+            fi
+
+            # Pull latest image
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/music_app:latest
+
+            # Stop and remove old container if exists
+            sudo docker stop music_app || true
+            sudo docker rm music_app || true
+
+            # Run new container
+            sudo docker run -d --name music_app -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/music_app:latest
+
+            # Verify container is running
+            if ! sudo docker ps | grep music_app; then
+              echo "Container failed to start"
+              exit 1
+            fi
+
+            # Verify deployment
             echo "Deployed files:"
             ls -la $AWS_DEPLOY_PATH
             echo "Java version:"
             java -version
-          EOF
+            echo "Docker containers:"
+            sudo docker ps
+          EOS2
