@@ -8,7 +8,6 @@ on:
     branches: [main]
 
 env:
-  AWS_DEPLOY_PATH: /home/${{ secrets.AWS_USER }}/app
   DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/music_app:latest
 
 jobs:
@@ -88,7 +87,6 @@ jobs:
       - name: Prepare EC2 environment
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} << 'EOF'
-            mkdir -p "$AWS_DEPLOY_PATH" || exit 1
             if ! command -v java &> /dev/null; then
               echo "Java not found, installing..."
               sudo yum update -y
@@ -99,8 +97,8 @@ jobs:
       - name: Deploy JAR to EC2
         run: |
           JAR_FILE=$(ls target/*.jar)
-          scp -o StrictHostKeyChecking=no "$JAR_FILE" ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:"$AWS_DEPLOY_PATH/"
-          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} "chmod +x $AWS_DEPLOY_PATH/*.jar"
+          scp -o StrictHostKeyChecking=no "$JAR_FILE" ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }}:~/app.jar
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} "chmod +x ~/app.jar"
 
       - name: Deploy Docker container
         run: |
@@ -126,8 +124,8 @@ jobs:
             sudo docker run -d --name music_app -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/music_app:latest || exit 1
 
             # Verify deployment
-            echo "Java application deployed to:"
-            ls -la "$AWS_DEPLOY_PATH"
+            echo "Java application deployed as:"
+            ls -la ~/app.jar
             echo "Docker containers running:"
             sudo docker ps
           EOF
