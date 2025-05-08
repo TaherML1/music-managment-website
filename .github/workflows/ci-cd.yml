@@ -1,4 +1,4 @@
-name: music_app Pipeline
+name: music_app_last Pipeline
 
 on:
   push:
