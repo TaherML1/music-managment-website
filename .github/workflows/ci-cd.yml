@@ -72,7 +72,7 @@ jobs:
 
       - name: Deploy Docker container on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} /bin/bash << 'EOS'
             # Install Docker if not installed
             if ! command -v docker &> /dev/null; then
               echo "Installing Docker..."
@@ -91,19 +91,19 @@ jobs:
               exit 1
             fi
 
-            # Pull latest image
-            sudo docker pull $DOCKER_IMAGE
+            # Pull latest image using the full image path
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/music_app:latest
 
             # Stop and remove old container if exists
             sudo docker stop music_app || true
             sudo docker rm music_app || true
 
-            # Run new container
-            sudo docker run -d --name music_app -p 80:8080 $DOCKER_IMAGE
+            # Run new container with explicit image reference
+            sudo docker run -d --name music_app -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/music_app:latest
 
             # Verify container is running
             if ! sudo docker ps | grep music_app; then
               echo "Container failed to start"
               exit 1
             fi
-          EOF
+          EOS
